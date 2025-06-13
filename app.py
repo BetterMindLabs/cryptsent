@@ -1,35 +1,44 @@
 import streamlit as st
 import google.generativeai as genai
 
-# Load API key from secrets
+# Load Gemini API key from secrets
 api_key = st.secrets["api_keys"]["google_api_key"]
 genai.configure(api_key=api_key)
 
-# Load Gemini model
+# Load Gemini 1.5 Flash model
 model = genai.GenerativeModel("gemini-1.5-flash")
 
 # UI
 st.set_page_config(page_title="🪙 Crypto Sentiment Tracker", page_icon="📈")
 st.title("🪙 Crypto Sentiment Tracker")
-st.markdown("Enter a prompt or comment about a cryptocurrency to get its **sentiment**.")
+st.markdown("Enter a crypto-related statement or comment to get its **sentiment** and a short **conclusion**.")
 
-user_prompt = st.text_area("💬 Enter crypto-related prompt:", placeholder="e.g., Bitcoin is going to hit 100K soon!")
+user_prompt = st.text_area("💬 Enter crypto prompt:", placeholder="e.g., Ethereum gas fees are finally dropping.")
 
 if st.button("Analyze Sentiment"):
     if user_prompt.strip() == "":
         st.warning("Please enter a valid prompt.")
     else:
-        with st.spinner("Analyzing sentiment..."):
+        with st.spinner("Analyzing with Gemini..."):
             prompt = f"""
-You're a crypto sentiment analysis engine. Respond with one of the following: Positive, Negative, or Neutral. 
+You're an AI crypto sentiment analyzer.
 
-Analyze the sentiment of the following comment about a cryptocurrency:
-
+Given the following input:
 \"{user_prompt}\"
 
-Just output the sentiment only.
+1. First, classify the overall **sentiment** as one of:
+- Positive
+- Negative
+- Neutral
+
+2. Then, give a **1-2 sentence conclusion** explaining why that sentiment fits.
+
+Respond strictly in this format:
+Sentiment: <Positive/Negative/Neutral>
+Conclusion: <Short conclusive reasoning>
 """
             response = model.generate_content(prompt)
-            sentiment = response.text.strip()
+            output = response.text.strip()
 
-        st.success(f"🧠 Sentiment: **{sentiment}**")
+        st.success("✅ Analysis Complete")
+        st.markdown(f"```\n{output}\n```")
