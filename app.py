@@ -1,44 +1,38 @@
 import streamlit as st
 import google.generativeai as genai
 
-# Load Gemini API key from secrets
+# Load Gemini API key
 api_key = st.secrets["api_keys"]["google_api_key"]
 genai.configure(api_key=api_key)
 
-# Load Gemini 1.5 Flash model
+# Load model
 model = genai.GenerativeModel("gemini-1.5-flash")
 
 # UI
-st.set_page_config(page_title="🪙 Crypto Sentiment Tracker", page_icon="📈")
-st.title("🪙 Crypto Sentiment Tracker")
-st.markdown("Enter a crypto-related statement or comment to get its **sentiment** and a short **conclusion**.")
+st.set_page_config(page_title="📊 Market Sentiment: Crypto", page_icon="📈")
+st.title("📊 Market Sentiment Analyzer for Cryptocurrencies")
+st.markdown("Type in a cryptocurrency name (e.g., Bitcoin, Ethereum, Solana) to get its **current market sentiment** and **a conclusive explanation.**")
 
-user_prompt = st.text_area("💬 Enter crypto prompt:", placeholder="e.g., Ethereum gas fees are finally dropping.")
+coin_name = st.text_input("🔍 Enter coin name:", placeholder="e.g., Bitcoin")
 
-if st.button("Analyze Sentiment"):
-    if user_prompt.strip() == "":
-        st.warning("Please enter a valid prompt.")
+if st.button("Get Market Sentiment"):
+    if coin_name.strip() == "":
+        st.warning("Please enter a coin name.")
     else:
-        with st.spinner("Analyzing with Gemini..."):
+        with st.spinner("Querying market sentiment via Gemini..."):
             prompt = f"""
-You're an AI crypto sentiment analyzer.
+You are a market analyst assistant with access to up-to-date crypto trends, news, and price movements.
 
-Given the following input:
-\"{user_prompt}\"
+Your task is to analyze and summarize the **current market sentiment** of the cryptocurrency: "{coin_name}".
 
-1. First, classify the overall **sentiment** as one of:
-- Positive
-- Negative
-- Neutral
+Respond in the following format:
+Sentiment: <Positive / Negative / Neutral>
+Conclusion: <1-2 sentence explanation based on news, trends, or price action.>
 
-2. Then, give a **1-2 sentence conclusion** explaining why that sentiment fits.
-
-Respond strictly in this format:
-Sentiment: <Positive/Negative/Neutral>
-Conclusion: <Short conclusive reasoning>
+Avoid generic phrases. Be as accurate and concise as possible.
 """
             response = model.generate_content(prompt)
             output = response.text.strip()
 
-        st.success("✅ Analysis Complete")
+        st.success("✅ Market Sentiment Retrieved")
         st.markdown(f"```\n{output}\n```")
